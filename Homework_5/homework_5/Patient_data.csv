@@ -1,0 +1,51 @@
+Patient_id,cancer_type,age,ethnicity,smoking,therapy,responsive,marker
+Patient1,Colon,57,Other,FALSE,Immunotherapy,TRUE,GPR146
+Patient2,Prostate,55,African American,TRUE,Immunotherapy,TRUE,SCARA5
+Patient3,Prostate,78,Other,FALSE,Radiation Therapy,TRUE,HIST2H4A
+Patient4,Colon,44,Other,TRUE,Immunotherapy,TRUE,CDRT4
+Patient5,Colon,20,Hispanic,TRUE,Hormone Therapy,FALSE,AQP3
+Patient6,Colon,23,Caucasian,FALSE,Chemotherapy,FALSE,MSH5
+Patient7,Prostate,77,Caucasian,FALSE,Surgery,TRUE,CTAGE4
+Patient8,Prostate,60,Hispanic,FALSE,Radiation Therapy,FALSE,RNASEK
+Patient9,Breast,62,Hispanic,TRUE,Surgery,FALSE,PTPRC
+Patient10,Lung,57,Caucasian,FALSE,Hormone Therapy,TRUE,MUC19
+Patient11,Skin,59,Hispanic,TRUE,Chemotherapy,FALSE,RNA5
+Patient12,Colon,37,African American,TRUE,Chemotherapy,FALSE,KCNB1
+Patient13,Prostate,45,Hispanic,FALSE,Hormone Therapy,TRUE,RMRP
+Patient14,Colon,31,Caucasian,TRUE,Stem Cell Transplantation,FALSE,KISS1
+Patient15,Colon,64,Other,TRUE,Topical Therapy,FALSE,TAGLN
+Patient16,Breast,49,Caucasian,FALSE,Topical Therapy,FALSE,GPR146
+Patient17,Prostate,59,African American,TRUE,Stem Cell Transplantation,FALSE,SCARA5
+Patient18,Breast,26,Hispanic,TRUE,Hormone Therapy,FALSE,HIST2H4A
+Patient19,Prostate,64,Hispanic,FALSE,Surgery,FALSE,CDRT4
+Patient20,Lung,64,Other,FALSE,Hormone Therapy,FALSE,AQP3
+Patient21,Lung,22,Other,FALSE,Immunotherapy,TRUE,MSH5
+Patient22,Colon,79,Caucasian,FALSE,Radiation Therapy,FALSE,CTAGE4
+Patient23,Prostate,77,African American,TRUE,Radiation Therapy,TRUE,RNASEK
+Patient24,Lung,37,Asian,TRUE,Radiation Therapy,FALSE,PTPRC
+Patient25,Skin,68,Caucasian,TRUE,Stem Cell Transplantation,FALSE,MUC19
+Patient26,Breast,52,Caucasian,FALSE,Radiation Therapy,FALSE,RNA5
+Patient27,Breast,38,Hispanic,TRUE,Topical Therapy,TRUE,KCNB1
+Patient28,Breast,62,Hispanic,FALSE,Stem Cell Transplantation,TRUE,RMRP
+Patient29,Skin,51,Asian,FALSE,Stem Cell Transplantation,TRUE,KISS1
+Patient30,Prostate,49,Other,FALSE,Immunotherapy,TRUE,TAGLN
+Patient31,Breast,70,Caucasian,FALSE,Hormone Therapy,FALSE,GPR146
+Patient32,Prostate,61,Other,TRUE,Surgery,FALSE,SCARA5
+Patient33,Colon,38,Other,TRUE,Surgery,FALSE,HIST2H4A
+Patient34,Colon,60,Hispanic,TRUE,Topical Therapy,FALSE,CDRT4
+Patient35,Colon,21,Other,FALSE,Topical Therapy,TRUE,AQP3
+Patient36,Lung,69,Asian,FALSE,Immunotherapy,TRUE,MSH5
+Patient37,Breast,40,Caucasian,TRUE,Topical Therapy,FALSE,CTAGE4
+Patient38,Breast,66,Hispanic,TRUE,Immunotherapy,TRUE,RNASEK
+Patient39,Colon,70,Other,TRUE,Surgery,FALSE,PTPRC
+Patient40,Prostate,44,Other,TRUE,Stem Cell Transplantation,FALSE,MUC19
+Patient41,Lung,65,African American,FALSE,Surgery,TRUE,RNA5
+Patient42,Colon,59,Other,TRUE,Immunotherapy,TRUE,KCNB1
+Patient43,Breast,46,Caucasian,TRUE,Topical Therapy,FALSE,RMRP
+Patient44,Prostate,67,Hispanic,TRUE,Chemotherapy,TRUE,KISS1
+Patient45,Breast,66,Caucasian,FALSE,Stem Cell Transplantation,TRUE,TAGLN
+Patient46,Breast,56,Hispanic,TRUE,Chemotherapy,FALSE,GPR146
+Patient47,Colon,67,African American,TRUE,Surgery,FALSE,SCARA5
+Patient48,Colon,51,Asian,TRUE,Surgery,FALSE,HIST2H4A
+Patient49,Prostate,41,Caucasian,FALSE,Chemotherapy,FALSE,CDRT4
+Patient50,Breast,79,Caucasian,TRUE,Radiation Therapy,FALSE,AQP3

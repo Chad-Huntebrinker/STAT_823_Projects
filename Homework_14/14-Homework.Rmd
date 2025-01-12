@@ -1,0 +1,537 @@
+---
+title: "Categorical Endpoints"
+output: word_document
+---
+
+```{r setup}
+library(tidyverse)
+
+# Import wages here
+library(readxl)
+wages <- read_excel("wages-2.xlsx")
+
+# Fall back in case you cannot load wages
+#wages <- heights %>%
+#  filter(income > 0) %>%
+#   mutate(marital = as.character(marital),
+#         sex = as.character(sex))
+
+# Import orings here
+library(readr)
+orings <- read_csv("orings.csv")
+
+# Fall back in case you cannot load orings
+require(faraway)
+# data(orings)
+
+# Add the code to import hsb2 here
+library(readr)
+hsb <- read_csv("hsb2.csv")
+
+### Backup Import
+#hsb2 <- within(read.csv("https://stats.idre.ucla.edu/#stat/data/hsb2.csv"), {
+#  race <- as.factor(race)
+#  schtyp <- as.factor(schtyp)
+#  prog <- as.factor(prog)
+#})
+
+```
+
+## Your Turn
+
+* Save the `wages` dataset to your computer.  
+* Change the working directory to the same location.
+* Import `wages` as wages and *copy the code to your setup chunk*.
+* Be sure to set NA: to NA.
+
+* Save the `hsb2` dataset to your computer.  
+* Change the working directory to the same location.
+* Import `hsb` as wages and *copy the code to your setup chunk*.
+* Be sure to set NA: to NA.
+
+* Save the `orings` dataset to your computer.  
+* Change the working directory to the same location.
+* Import `orings` as wages and *copy the code to your setup chunk*.
+* Be sure to set NA: to NA.
+
+## Example: Chi-square Test of Independence Replication
+
+```{r}
+### Chi-square example
+
+x <- c(rep("Surg",33),rep("NoSurg",18))
+y <- c(rep("Yes",2),rep("No",31),rep("Yes",1),rep("No",17))
+
+df <- data.frame(cbind(x,y))
+
+df.g <- df %>% group_by(x) %>% count(y) %>% mutate(prop = n/sum(n))  
+  
+ggplot(data=df.g, aes(x = x, y = prop, fill = y)) + 
+  geom_bar(stat = "identity") + 
+  labs(x="Treatment Group",fill="CV Death",y="Proportion")
+
+x.mat <- matrix(df.g$n,nrow=2,ncol=2)
+chisq.test(x.mat)
+
+### Chi-square example
+
+x <- c(rep("Surg",33),rep("NoSurg",18))
+y <- c(rep("Yes",4),rep("No",29),rep("Yes",1),rep("No",17))
+
+df <- data.frame(cbind(x,y))
+
+df.g <- df %>% group_by(x) %>% count(y) %>% mutate(prop = n/sum(n))  
+
+ggplot(data=df.g, aes(x = x, y = prop, fill = y)) + 
+  geom_bar(stat = "identity") + 
+  labs(x="Treatment Group",fill="CV Death",y="Proportion")
+
+x.mat <- matrix(df.g$n,nrow=2,ncol=2)
+chisq.test(x.mat)
+
+### Replicate Chi-square example result
+
+x <- c(rep("Surg",32990),rep("NoSurg",173965))
+y <- c(rep("Yes",4068),rep("No",28922),rep("Yes",9101),rep("No",164864))
+
+df <- data.frame(cbind(x,y))
+
+df.g <- df %>% group_by(x) %>% count(y) %>% mutate(prop = n/sum(n))  
+
+ggplot(data=df.g, aes(x = x, y = prop, fill = y)) + 
+  geom_bar(stat = "identity") + 
+  labs(x="Treatment Group",fill="CV Death",y="Proportion")
+
+x.mat <- matrix(df.g$n,nrow=2,ncol=2)
+
+x.mat <- matrix(c(28922,4068,164864,9101),nrow=2,ncol=2)
+chisq.test(x.mat)
+chisq.test(x.mat)$observed
+chisq.test(x.mat)$expected
+
+### Chi-square distribution
+
+x <- seq(0,40,0.01)
+y <- dchisq(x,20)
+plot(y~x,type="l",xlab=expression(chi^2),ylab=expression(P(chi^2)))
+text(30,0.06,expression(df==20))
+y2 <- dchisq(x,1)
+lines(y2~x,col="blue")
+text(7,0.06,expression(df==1),col="blue")
+```
+
+## Example: Chi-square Goodness of Fit test
+
+```{r}
+### Barchart of sex
+
+wages <- wages %>% mutate(dummy="")
+
+wages %>% ggplot(aes(x=dummy,fill=sex)) +
+  geom_bar(position="stack") +
+  xlab("") +
+  labs(title="Wages Survey",
+       subtitle="5266 respondents",
+       x="",
+       y="Frequency",
+       fill="Sex")
+
+### Chi-square goodness of fit test on wages
+
+df.g <- wages %>% group_by(sex) %>% summarise(n=n()) %>% mutate(prop = n/sum(n)) 
+x.mat <- matrix(df.g$n,nrow=1,ncol=2)
+chisq.test(x.mat,p=c(0.5,0.5))
+
+### Exact Binomial Confidence intervals for proportions
+binom.test(x.mat[1],x.mat[2]+x.mat[1]) # Females = 2609 out of 2609+2657 total
+binom.test(x.mat[2],x.mat[2]+x.mat[1]) # Males = 2657 out of 2609+2657 total
+```
+
+## Example: Chi-square Test of Independence
+
+```{r}
+### Barchart of sex and marital status
+
+wages %>% ggplot(aes(x=sex,fill=marital)) +
+  geom_bar() +
+  labs(title="Wages Survey",
+       subtitle="5266 respondents",
+       x="Sex",
+       y="Frequency",
+       fill="Marital Status")
+
+df.g <- wages %>% group_by(sex,marital) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))
+
+### Barchart of sex and marital status proportions
+df.g %>% ggplot(aes(x=sex,y=prop,fill=marital)) +
+  geom_col() +
+  labs(title="Wages Survey",
+       subtitle="5266 respondents",
+       x="Sex",
+       y="Proportion",
+       fill="Marital Status")
+
+
+### Chi-square test of independence on wages
+
+x.mat <- matrix(df.g$n,nrow=5,ncol=2)
+(c <- chisq.test(x.mat))
+c$observed
+c$expected
+c$residuals
+x.mat
+(cont <- 100*c$residuals^2/c$statistic) # which cells contribute the most?
+
+### Exact Binomial Confidence intervals for proportions
+binom.test(x.mat[5,1],x.mat[5,1]+x.mat[5,2]) # Proportion of divorced that are females
+binom.test(x.mat[5,2],x.mat[5,1]+x.mat[5,2]) # Proportion of divorced that are males
+
+binom.test(x.mat[5,1],x.mat[1,1]+x.mat[2,1]+x.mat[3,1]+x.mat[4,1]+x.mat[5,1]) # Proportion of females that are widowed
+binom.test(x.mat[5,2],x.mat[1,2]+x.mat[2,2]+x.mat[3,2]+x.mat[4,2]+x.mat[5,2]) # Proportion of males that are widowed
+```
+
+## Example: Logistic Regression on Binary Y
+
+```{r}
+### Logistic regression Challenger example
+
+data(orings)
+
+## Recode damage variable to a binary "Failure" versus "No Failure" variable
+orings <- orings %>% mutate(fail = damage > 0)
+orings %>% count(fail) # Checking recode   
+
+# Bar chart of failure
+
+df.g <- orings %>% group_by(fail) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))  
+
+ggplot(data=df.g, aes(x = fail, y = prop)) + 
+  geom_bar(stat = "identity") + 
+  labs(x="O-Ring Failure",fill="",y="Proportion")
+
+plot(fail~temp, orings, xlim=c(25,85), ylim=c(0,1),
+     xlab="Temperature",ylab="Probability of Damage",pch=19)
+abline(lm(fail~temp, orings))
+
+m <- glm(fail~temp, family = binomial, data = orings)
+summary(m)
+
+x <- seq(25,85,1)
+lines(x, ilogit(coef(m)[1]+coef(m)[2]*x),col="blue")
+
+# Confidence Intervals for Regression Parameters
+# Using Normal Approximations
+# beta-hat +/- Z_alpha/2 SE(beta-hat)
+alpha <- 0.1
+(lb <- coef(m)[2] - qnorm(1-alpha/2,0,1)*summary(m)$coef[2,2])
+(ub <- coef(m)[2] + qnorm(1-alpha/2,0,1)*summary(m)$coef[2,2])
+
+## Z distribution
+x <- seq(-5,5,0.01)
+z <- dnorm(x,0,1)
+plot(z~x,type="l",xlab="z",ylab="Sampling Distribution")
+
+# Another approach
+library(MASS)
+confint(m)
+
+# Interpretation of Regression Parameter
+# Transform it to an odds ratio
+exp(coef(m)[2])
+
+## Predict log odds and transform back to scale of probability
+
+# Predict the Response
+ilogit(coef(m)[1]+coef(m)[2]*31)
+
+# Another way
+x.new <- c(1,31)
+link <- sum(x.new*coef(m))
+ilogit(link)
+
+p <- predict(m, newdata = data.frame(temp=31), se=T)
+ilogit(p$fit - qnorm(1-alpha/2,0,1)*p$se.fit)
+ilogit(p$fit + qnorm(1-alpha/2,0,1)*p$se.fit)
+
+# Inverse prediction
+# What value of X will lead to a certain probability threshold of the event?
+library(MASS)
+dose.p(m,p=0.5)
+dose.p(m,p=0.1)
+```
+
+## Example: Logistic Regression on Proportion instead of Binary Y
+
+```{r}
+
+### Second Logistic regression Challenger example modeling the probability of 
+### damage using the number of o-rings damaged out of 6.
+
+plot(damage/6~temp, orings, xlim = c(25,85),
+     ylim=c(0,1), xlab = "Temperature", ylab = "Probability of Damage",
+     pch = 19)
+abline(lm(damage/6~temp, orings))
+
+m <- glm(cbind(damage,6-damage)~temp, family = binomial, data = orings)
+summary(m)
+
+plot(damage/6~temp, orings, xlim = c(25,85),
+     ylim=c(0,1), xlab = "Temperature", ylab = "Probability of Damage",
+     pch = 19)
+x <- seq(25,85,1)
+lines(x, ilogit(coef(m)[1]+coef(m)[2]*x),col="blue")
+
+# Confidence Intervals for Regression Parameters
+# Using Normal Approximations
+# beta-hat +/- Z_alpha/2 SE(beta-hat)
+alpha <- 0.1
+(lb <- coef(m)[2] - qnorm(1-alpha/2,0,1)*summary(m)$coef[2,2])
+(ub <- coef(m)[2] + qnorm(1-alpha/2,0,1)*summary(m)$coef[2,2])
+
+# Another approach
+library(MASS)
+confint(m)
+
+# Interpretation of Regression Parameter
+# Transform it to an odds ratio
+exp(coef(m)[2])
+
+## Predict log odds and transform back to scale of probability
+
+# Predict the Response
+ilogit(coef(m)[1]+coef(m)[2]*31)
+
+# Another way
+x.new <- c(1,31)
+link <- sum(x.new*coef(m))
+ilogit(link)
+
+p <- predict(m, newdata = data.frame(temp=31), se=T)
+ilogit(p$fit - qnorm(1-alpha/2,0,1)*p$se.fit)
+ilogit(p$fit + qnorm(1-alpha/2,0,1)*p$se.fit)
+
+# Inverse prediction
+# What value of X will lead to a certain probability threshold of the event?
+dose.p(m,p=0.5)
+
+### Your Turn 6
+
+## Recode variable to quantile
+wages <- wages %>% mutate(new.income = income > quantile(income,0.95))
+wages %>% count(new.income) # Checking recode   
+
+# Bar chart
+
+df.g <- wages %>% group_by(new.income) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))  
+
+ggplot(data=df.g, aes(x = new.income, y = prop)) + 
+  geom_bar(stat = "identity") + 
+  labs(x="Income in 95th Percentile",fill="",y="Proportion")
+
+df.g <- wages %>% group_by(sex,new.income) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))
+
+### Barchart of sex and income status proportions
+df.g %>% ggplot(aes(x=sex,y=prop,fill=new.income)) +
+  geom_col() +
+  labs(title="Wages Survey",
+       subtitle="5266 respondents",
+       x="Sex",
+       y="Proportion",
+       fill="Income in 95th Percentile")
+
+plot(fail~temp, orings, xlim=c(25,85), ylim=c(0,1),
+     xlab="Temperature",ylab="Probability of Damage",pch=19)
+abline(lm(fail~temp, orings))
+
+m <- glm(fail~temp, family = binomial, data = orings)
+summary(m)
+
+x <- seq(25,85,1)
+lines(x, ilogit(coef(m)[1]+coef(m)[2]*x),col="blue")
+
+```
+
+## Your Turn 1
+
+Use the `pchisq()` function to calculate the p-value for \(\chi^2=3\) with 1 and 10 degrees of freedom and make a decision.
+
+```{r}
+p_value_1 <- 1 - pchisq(3, df = 1)
+
+p_value_10 <- 1 - pchisq(3, df = 10)
+
+p_value_1
+p_value_10
+
+#As the degrees of freedom increase, so does the spread of values.  As a result, higher DFs (like 10) will
+#lead to higher probabilities that the values are to the right of our chi value of 3.
+```
+
+## Your Turn 2
+
+Uncomment the code to generate binary data for two groups with equal proportions, then create a stacked barchart using `ggplot()`.
+
+```{r}
+
+x <- c(rep("A",100),rep("B",100))
+y <- rbinom(200,1,0.5)
+
+# Create a stacked bar chart using ggplot2
+ggplot(mapping = aes(x = x, fill = factor(y, labels = c("0", "1")))) +
+  geom_bar(position = "stack") +
+  labs(title = "Stacked Bar Chart",
+       x = "Group",
+       y = "Count",
+       fill = "Outcome") +
+  theme_minimal()
+
+```
+
+
+## Your Turn 3
+
+Use the `hsb2` dataset to test whether there are an equal number of males and females surveyed. Create the stacked barchart and calculate the exact 95% confidence intervals for each gender. Interpret.
+
+```{r}
+hsb <- hsb %>% mutate(dummy="")
+
+hsb %>% ggplot(aes(x=dummy,fill=gender)) +
+  geom_bar(position="stack") +
+  xlab("") +
+  labs(title="Stacked Bar Chart",
+       x="",
+       y="Frequency",
+       fill="Gender")
+
+df.g <- hsb %>% group_by(gender) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))
+x.mat <- matrix(df.g$n, nrow=1, ncol=2)
+chisq.test(x.mat,p=c(0.5,0.5))
+
+binom.test(x.mat[1],x.mat[2]+x.mat[1]) #109 / 200 females
+binom.test(x.mat[2],x.mat[2]+x.mat[1]) #91 / 200 males
+
+#We cannot reject H0 (Oi = Ei for all i) as the p value (0.2031) is greater than 0.05.
+```
+
+## Your Turn 4
+
+Use the `hsb2` dataset to test whether race and socio-economic status are independent. Don't forget to visualize the relationship and generate estimates and confidence intervals. Interpret.
+
+```{r}
+hsb %>% ggplot(aes(x=ses,fill=race)) +
+  geom_bar() +
+  labs(title="Stacked Bar Chart",
+       x="SES",
+       y="Frequency",
+       fill="Race")
+
+df.g <- hsb %>% group_by(ses,race) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))
+
+### Barchart of ses and race status proportions
+df.g %>% ggplot(aes(x=ses,y=prop,fill=race)) +
+  geom_col() +
+  labs(x="SES",
+       y="Proportion",
+       fill="Race")
+
+### Barchart of race and ses status proportions
+df.g %>% ggplot(aes(x=race,y=prop,fill=ses)) +
+  geom_col() +
+  labs(x="Race",
+       y="Proportion",
+       fill="ses")
+
+
+### Chi-square test of independence on ses with race
+
+x.mat <- matrix(df.g$n,nrow=4,ncol=3)
+(c <- chisq.test(x.mat))
+#The p value is 0.005, so reject H0
+
+x.mat
+(cont <- 100*c$residuals^2/c$statistic)
+#It looks like the biggest contributors to rejection are African Americans and Whites.
+#So we'll get confidence intervals for those.
+
+### Exact Binomial Confidence intervals for proportions
+binom.test(x.mat[1,1],x.mat[1,1]+x.mat[1,2] + x.mat[1,3]) # Proportion of african american that are low SES
+binom.test(x.mat[1,2],x.mat[1,1]+x.mat[1,2] + x.mat[1,3]) # Proportion of african american that are middle SES
+binom.test(x.mat[1,3],x.mat[1,1]+x.mat[1,2] + x.mat[1,3]) # Proportion of african american that are high SES
+
+binom.test(x.mat[4,1],x.mat[4,1]+x.mat[4,2] + x.mat[4,3]) # Proportion of whites that are low SES
+binom.test(x.mat[4,2],x.mat[4,1]+x.mat[4,2] + x.mat[4,3]) # Proportion of whites that are middle SES
+binom.test(x.mat[4,3],x.mat[4,1]+x.mat[4,2] + x.mat[4,3]) # Proportion of whites that are high SES
+```
+
+## Your Turn 5
+
+Use the `hsb2` dataset. Fit a logistic regression model to test whether reading scores are associated with mathematics scores in at least the 75th percentile.  Visualize the data, generate estimates and confidence intervals, and interpret the results.
+
+```{r}
+#Get the value for the 75th percentile in math
+cutoff <- quantile(hsb$math, 0.75)
+
+#Create a new column called Y that is either 1 or 0 for Math scores
+#Create the model
+hsb <- hsb %>% mutate(Y = ifelse(math >= cutoff, 1, 0))
+model_1 <- glm(Y ~ read, data = hsb, family = binomial)
+summary(model_1)
+#B0 = 9.27693
+#B1 = 0.14841
+
+#p value (2.24e-10) and z score (6.344) lead us to reject H0.  As a result, B1 != 0
+
+confint(model_1)
+
+ggplot(hsb, aes(x = read, y = Y)) +
+  geom_point(aes(color = factor(Y))) +
+  geom_smooth(method = "glm", method.args = list(family = binomial), se = FALSE) +  
+  labs(x = "Reading Score",
+       y = "Proportions") +
+  theme_minimal()
+
+```
+
+## Your Turn 6
+
+Use the `wages` dataset. Fit a logistic regression model to test whether sex is associated with income in at least the 95th percentile.  Visualize the data, generate estimates and confidence intervals, and interpret the results.
+
+```{r}
+#Get the value for the 95th percentile in income
+income_95th_percentile <- quantile(wages$income, 0.95)
+
+#Create a new column called Y that is either 1 or 0 for Income scores
+#Create the model
+wages <- wages %>% mutate(Y = ifelse(income >= cutoff, 1, 0))
+wages <- wages %>% mutate(factor_sex = ifelse(sex == "male", 1, 0))
+
+df.g <- wages %>% group_by(Y) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))  
+
+ggplot(data=df.g, aes(x = Y, y = prop)) + 
+  geom_bar(stat = "identity") + 
+  labs(x="Income in 95th Percentile",fill="",y="Proportion")
+
+df.g <- wages %>% group_by(sex,Y) %>% summarise(n=n()) %>% mutate(prop = n/sum(n))
+
+df.g %>% ggplot(aes(x=sex,y=prop,fill=Y)) +
+  geom_col() +
+  labs(title="Wages Survey",
+       subtitle="5266 respondents",
+       x="Sex",
+       y="Proportion",
+       fill="Income in 95th Percentile")
+
+model_2 <- glm(Y ~ factor_sex, data = wages, family = binomial)
+summary(model_2)
+
+
+confint(model_2)
+
+ggplot(wages, aes(x = sex, y = Y)) +
+  geom_point(aes(color = factor(Y))) +
+  geom_smooth(method = "glm", method.args = list(family = binomial), se = FALSE) +  
+  labs(x = "Income level",
+       y = "Probability of Income") +
+  theme_minimal()
+```
+

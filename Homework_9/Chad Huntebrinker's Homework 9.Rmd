@@ -1,0 +1,359 @@
+---
+title: "Random Variables in R"
+author: "Chad Huntebrinker"
+date: 
+output: 
+  word_document: default
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document: default 
+  odt_document: default
+  md_document: default
+  rtf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(rmarkdown)
+library(graphics)
+out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+display_output <- function(dataset, out_type, filter_opt = 'none') {
+  
+  if (out_type == "html") {
+    out_table <- DT::datatable(dataset, filter = filter_opt)
+  } else {
+    out_table <- knitr::kable(dataset)
+  } 
+  
+  out_table
+}
+```
+
+#### Introduction
+
+R has a suite of functions dealing with random variables.
+
+1. The `r` functions generate random numbers drawn from several different probability distributions. In order to replicate the **exact** random numbers each time you run this document, you must set your seed using `set.seed`.  Try running the chunk of code below, then uncomment the first line and rerun it with the seed set.  See how things change for different values of `set.seed`. 
+
+```{r}
+#set.seed(3)
+hist(rbinom(n=10,size=1,p=0.5)) # 10 Bernoulli random numbers with p = 0.5
+```
+
+##### Your Turn 1
+
+In the code chunk below, generate 10 random numbers from a normal distribution with mean = 10 and variance = 2, then use the `hist` function to display them.  Use the RStudio search feature to pull up the help on the normal distribution if you need it.  And don't forget to set a seed so you can replicate your exact output later.
+
+```{r}
+set.seed(3)
+
+rando_nums <- rnorm(10, mean = 10, sd = sqrt(2))
+
+hist(rando_nums)
+
+```
+
+2. The `d` functions generate the probability functions (height of function). Below, I generate the probability distribution for a binomial random variable with success probability \(p = 0.5\) and \(n = 10\) independent Bernoulli trials.  
+
+```{r}
+#set.seed(3)
+x <- seq(0,10,1) # All possible outcomes of the binomial random variable 
+                 # assuming n = 10 trials
+y <- dbinom(x,size=10,prob=0.5) # Binomial probability distribution with 
+                                # p = 0.5 in n = 10 trials
+plot(y~x, type="h", xlab="Y", ylab=expression(P(Y)), main="Binomial(n=10,p=0.5)")
+```
+
+##### Your Turn 2
+
+In the code chunk below, use the vector `x` that I have created to generate the negative binomial probability distribution with probability of success = 0.5 and number of successes = 10, then plot the probability distribution. Make sure you accurately label all your axes and create an informative figure title.  Use the RStudio search feature to pull up the help on the negative binomial distribution if you need it.  And don't forget to set a seed so you can replicate your exact output later. Remember, here the \(x\)-axis represents the number of trials required to observe \(r=10\) successes when the probability of a success in each trial is 0.5.  Does the probability distribution make sense to you?
+
+```{r}
+set.seed(3)
+x <- seq(0,30,1)
+
+y <- dnbinom(x,size=10,prob=0.5)
+
+plot(y~x, type="h", xlab="Number of Trials", ylab="Probability", main="Negative Binomial Probaility")
+
+```
+Yes, the probability distribution makes sense.
+
+3. The `q` functions generate quantiles from the probability distributions. Below, I am using the `qt` function to figure out what value of \(t\) corresponds to the median, or 50th percentile of a \(t\) distribution with 20 degrees of freedom.  The 50th percentile is the value of \(t\) that cuts the probability distribution exactly in half. Remember what the \(t\) distribution looks like.  Does my answer make sense?
+
+```{r}
+qt(p=0.5,df=20)
+```
+Yes, that does make sense.  Since the t distribution is symmetric about zero, it would make sense for the median to be 0.
+
+##### Your Turn 3
+
+In the code chunk below, find the value of \(F\) from an \(F\) distribution with 2 and 32 degrees of freedom that cuts off the lower 95% of the probability distribution from the upper 5%. Use the RStudio search feature to pull up the help on the \(F\) distribution if you need it.
+
+```{r}
+#??"F Distribution"
+qf(0.95, 2, 32)
+
+```
+
+
+4. The `p` functions generate cumulative probability from the probability distributions. Below I am using the `pt` function to figure out \(P(t<0)\) using a \(t\) distribution with 20 degrees of freedom.  Remember what the \(t\) distribution looks like.  Does my answer make sense?
+
+```{r}
+pt(q=0,df=20)
+```
+Yes, you're answer makes sense.  It's saying that there's a 50% chance of a t-distribution to be less than 0.
+
+##### Your Turn 4
+
+In the code chunk below, find \(P(Y<-2.83)\) from a normal distribution with mean 0 and variance 1. How can you use one of the rules of probability to calculate \(P(Y\geq -2.83)\) from your first line of code? Write the code on the next line of the code chunk.  Finally, use the RStudio documentation on `pnorm` to figure out how to use the function to get \(P(Y\geq -2.83)\) directly.
+
+```{r}
+pnorm(-2.83)
+```
+
+### Discrete Distributions
+
+#### Bernoulli
+
+A **Bernoulli random variable** $Y$ can take on the values 1 (success) with probability $p$, or 0 (failure) with probability $q = 1 - p$.  The plot below contains the probability distribution of two Bernoulli distributions.  The first (in gray) has a probability of success $p = 0.2$ and the second (in black) has a probability of success $p = 0.5$.
+
+```{r}
+x <- 0:1
+plot(x, dbinom(x, 1, 0.2), type = "h", xlab= "Y", ylab = "f(Y)", 
+     ylim = c(0,1), lwd = 8, col = "dark gray", main = "Bernoulli(0.2)")
+lines(x, dbinom(x, 1, 0.5), type = "h", lwd = 2, col = "black")
+legend(0.7, 1.0, c("Bernoulli(0.2)","Bernoulli(0.5)"),col=c("dark gray","black"), lwd=c(8,2))
+```
+
+##### Your Turn 5
+
+Plot Bernoulli probability distributions for $p=0.1$ and $p=0.9$. Make sure you accurately label all your axes and create an informative figure title. 
+
+```{r}
+x <- 0:1
+plot(x, dbinom(x, 1, 0.1), type = "h", xlab= "Success (1) or Failure (0)", ylab = "Probability of Success or Failures", 
+     ylim = c(0,1), lwd = 8, col = "dark gray", main = "Bernoulli 0.1 and 0.9")
+lines(x, dbinom(x, 1, 0.9), type = "h", lwd = 2, col = "black")
+legend(0.7, 1.0, c("Bernoulli(0.1)","Bernoulli(0.9)"),col=c("dark gray","black"), lwd=c(8,2))
+```
+
+The Bernoulli experiment forms the foundation for many of the next discrete distributions.
+
+#### Binomial
+
+The **binomial distribution** applies when we perform $n$ independent Bernoulli trials and are interested in the total number of "successes" observed.  The outcome here, $y = \sum x_i$, where $P(x_i = 1) = p$ and $P(x_i = 0) = 1 - p$.  The plot below displays three binomial distributions, all for $n = 10$ Bernoulli trials: in gray, $p = 0.5$; in blue, $p = 0.1$; and in green, $p = 0.9$.  
+
+```{r}
+x <- seq(0, 10, 1)
+plot(x, dbinom(x, 10, 0.5), type = "h", ylab = "f(x)", lwd = 8, col = "dark gray", ylim = c(0,0.5),
+     main = "Binomial(10, 0.5) pmf")
+lines(x, dbinom(x, 10, 0.1), type = "h", lwd = 2, col = "blue")
+lines(x, dbinom(x, 10, 0.9), type = "h", lwd = 2, col = "green")
+legend(3, 0.5, c("Binomial(10,0.1)","Binomial(10,0.5)","Binomial(10,0.9)"), col=c("blue","dark gray","green"),lwd=c(2,8,2))
+
+```
+
+We can see the shifting of probability from low values for $p = 0.1$ to high values for $p = 0.9$.  This makes sense, as it becomes more likely with $p = 0.9$ to observe a success for an individual trial.  Thus, in 10 trials, more successes (e.g., 8, 9, or 10) are likely.  For $p = 0.5$, the number of successes are likely to be around 5 (e.g., half of the 10 trials).
+
+#### Geometric
+
+The **geometric distribution** applies when we are interested in the number of independent Bernoulli trials that are required to observe a single "success." The plot below displays the probability distribution for the number of trials required to observe 1 "success" with the probability of success is $p = 0.2$.  
+
+```{r}
+x <- seq(0, 20, 1)
+plot(x, dgeom(x, 0.2), type = "h", lwd = 2,
+    ylab = expression(P(Y)), xlab = "Number of trials, Y",
+    main = "Geometric(0.2) pmf")
+
+```
+
+##### Your Turn 6
+
+What happens to the geometric distribution if you vary $p$?  Show me a few plots and explain.
+
+```{r}
+x <- seq(0, 20, 1)
+plot(x, dgeom(x, 0.1), type = "h", lwd = 2,
+    ylab = expression(P(Y)), xlab = "Number of trials, Y",
+    main = "Geometric(0.1) pmf")
+plot(x, dgeom(x, 0.5), type = "h", lwd = 2,
+    ylab = expression(P(Y)), xlab = "Number of trials, Y",
+    main = "Geometric(0.5) pmf")
+plot(x, dgeom(x, 0.9), type = "h", lwd = 2,
+    ylab = expression(P(Y)), xlab = "Number of trials, Y",
+    main = "Geometric(0.9) pmf")
+```
+What we see is that as $p$ increases (from 0.1 -> 0.5 -> 0.9), we see the curve gets steeper and steeper. As a result, we can conclude that as we increase the probability of success, the less amount of trials are needed.
+
+#### Negative Binomial
+
+The **negative binomial distribution** generalizes the geometric distribution for 1 or more successes.  I have below has set $r = 1$, so it's identical to the geometric above.  
+
+```{r}
+x <- seq(0, 20, 1)
+plot(x, dnbinom(x,1,0.2), type = "h", ylab = "f(x)", lwd = 2,
+     main = "Negative Binomial(0.2) pmf")
+
+```
+
+##### Your Turn 7
+
+Play around with the number of successes $r$ and see how the negative binomial distribution changes.
+
+```{r}
+x <- seq(0, 20, 1)
+plot(x, dnbinom(x,1,0.2), type = "h", ylab = "f(x)", lwd = 2,
+     main = "Negative Binomial with r = 1")
+plot(x, dnbinom(x,5,0.2), type = "h", ylab = "f(x)", lwd = 2,
+     main = "Negative Binomial with r = 5")
+plot(x, dnbinom(x,10,0.2), type = "h", ylab = "f(x)", lwd = 2,
+     main = "Negative Binomial with r = 10")
+plot(x, dnbinom(x,20,0.2), type = "h", ylab = "f(x)", lwd = 2,
+     main = "Negative Binomial with r = 20")
+```
+
+#### Poisson
+
+The **Poisson distribution** describes the number of "successes" that occur over a fixed period of time. The rate parameter \(\lambda\) represents the expected number of successes during the time period. For example, the distribution below could be describing the chances that 0, 1, 2, 3, 4, or 5 parties will be seated at a restaurant in the next 15 minutes if the average number of parties seated every 15 minutes is only \(\lambda = 1\). 
+
+```{r}
+x <- seq(0, 5, 1)
+plot(x, dpois(x, lambda=1), type = "h", xlab = "Number of Successes", ylab = "Probability", main = "Poisson(1) pmf", lwd = 2)
+
+```
+
+##### Your Turn 8
+
+What happens if you increase $\lambda$? To 2? To 3? to 5? How do these changes impact the chances that 5 parties will be seated in the next 15 minutes?  
+
+```{r}
+x <- seq(0, 5, 1)
+plot(x, dpois(x, lambda=2), type = "h", xlab = "Number of Successes", ylab = "Probability", main = "Poisson(2) pmf", lwd = 2)
+plot(x, dpois(x, lambda=3), type = "h", xlab = "Number of Successes", ylab = "Probability", main = "Poisson(3) pmf", lwd = 2)
+plot(x, dpois(x, lambda=5), type = "h", xlab = "Number of Successes", ylab = "Probability", main = "Poisson(5) pmf", lwd = 2)
+
+```
+We see that the impact is in the number of successes.  As we increase r from 2 -> 3 -> 5, we see that the number of success increase as well.
+
+### Continuous Distributions
+
+#### Normal
+
+The **Normal distribution** has two parameters: \(\mu\) which is its mean, and \(\sigma^2\) which is its variance.  The Normal distribution functions in R use \(\sigma\), the standard deviation, instead of \(\sigma^2\).  Below, I have plotted the probability distribution of a normal random variable with mean 0 and variance 3. 
+
+```{r}
+x <- seq(-5, 5, 0.01)
+plot(x, dnorm(x, 0, sqrt(3)), type = "l", ylab = "f(x)", main = "Normal(0, 3) pdf")
+
+```
+
+##### Your Turn 9
+
+What happens if you decrease $\sigma^2$ to 2? To 1? How do these changes impact the probability that \(Y\) will be bigger than 3? Use the `pnorm` function to calculate \(P(X>3)\) for my normal distribution and these distributions.  
+
+```{r}
+x <- seq(-5, 5, 0.01)
+plot(x, dnorm(x, 0, sqrt(2)), type = "l", ylab = "f(x)", main = "Normal(0, 2) pdf")
+plot(x, dnorm(x, 0, sqrt(1)), type = "l", ylab = "f(x)", main = "Normal(0, 1) pdf")
+1 - pnorm(3, sd = sqrt(3))
+1 - pnorm(3, sd = sqrt(2))
+1 - pnorm(3, sd = sqrt(1))
+```
+We see that as we decrease $\sigma^2$, there is a higher a amount around the mean 0 (thus a thinner and taller peak).
+
+#### Chi-square 
+
+The **Chi-square distribution** is formed by squaring and summing up independent standard normal random variables.  This distribution has one parameters: \(\nu\) which is its degrees of freedom.  We will talk more about degrees of freedom later.  Below, I have plotted the probability distribution of a chi-square random variable with 20 degrees of freedom. 
+
+```{r}
+x <- seq(0, 40, 0.01)
+plot(x, dchisq(x, 20), type = "l", xlab = "Y", ylab = "P(Y)", main = "Chi-square(20) pdf")
+
+```
+
+##### Your Turn 10
+
+What happens if you decrease \(\nu\) to 10? To 5? To 1? Plot these new distributions below and use the `pchisq` function to calculate \(P(Y>30)\) and the `dchisq` function to determine the height of the function at \(Y=30\) for each distribution.
+
+```{r}
+x <- seq(0, 40, 0.01)
+plot(x, dchisq(x, 10), type = "l", xlab = "Y", ylab = "P(Y)", main = "Chi-square(10) pdf")
+plot(x, dchisq(x, 5), type = "l", xlab = "Y", ylab = "P(Y)", main = "Chi-square(5) pdf")
+plot(x, dchisq(x, 1), type = "l", xlab = "Y", ylab = "P(Y)", main = "Chi-square(1) pdf")
+1 - pchisq(30, 20)
+dchisq(30, 20)
+1 - pchisq(30, 10)
+dchisq(30, 10)
+1 - pchisq(30, 5)
+dchisq(30, 5)
+1 - pchisq(30, 1)
+dchisq(30, 1)
+```
+As we decrease \(\nu\), we see that not only does the slope of the graph move back, but it also gets thinner and taller too; thus showing the mean and varaince decreases
+
+#### Students \(t\)
+
+The **Student's \(t\) distribution** is formed using a standard normal random variable and an independent chi-square random variable. This distribution has one parameter that results from its dependence on a chi-square: \(\nu\) which is also its degrees of freedom.  Below, I have plotted the probability distribution of a \(t\) random variable with 20 degrees of freedom.
+
+```{r}
+x <- seq(-5, 5, 0.01)
+plot(x, dt(x, 20), type = "l", ylab = "f(x)", main = "Student's t(20) pdf")
+
+```
+
+##### Your Turn 11
+
+What happens if you decrease \(\nu\) to 10? To 5? To 1? Plot these new distributions below and use the `pt` function to calculate \(P(X>3.5)\) and the `dt` function to determine the height of the function at \(X=3.5\) for each distribution.
+
+```{r}
+x <- seq(-5, 5, 0.01)
+plot(x, dt(x, 10), type = "l", ylab = "f(x)", main = "Student's t(10) pdf")
+plot(x, dt(x, 5), type = "l", ylab = "f(x)", main = "Student's t(5) pdf")
+plot(x, dt(x, 1), type = "l", ylab = "f(x)", main = "Student's t(1) pdf")
+
+1 - pt(3.5, 20)
+dchisq(3.5, 20)
+1 - pt(3.5, 10)
+dchisq(3.5, 10)
+1 - pt(3.5, 5)
+dchisq(3.5, 5)
+1 - pt(3.5, 1)
+dchisq(3.5, 1)
+```
+We see that as we decrease \(\nu\) the shape get smaller and thinner (meaning the probability of more values being outside of the mean increases).
+
+#### \(F\)
+
+An **\(F\) random variable** is created by taking the ratio of two independent chi-square random variables each dividing by its corresponding degrees of freedom.  So, the \(F\) distribution has two parameters that result from its dependence on the two chi-squares: \(\nu_1\) and \(\nu_2\), or the numerator and denominator degrees of freedom.  Below, I have plotted the probability distribution of an \(F\) random variable with 1 and 20 degrees of freedom.
+
+```{r}
+x <- seq(0, 6, 0.01)
+plot(x, df(x, 1, 20), type = "l", ylab = "f(x)", main = "F(1,20) pdf")
+```
+
+##### Your Turn 12
+
+How do the degrees of freedom (numerator and/or denominator) change the shape?  Increase the numerator degrees of freedom to 19 and plot. Explain the changes you see.
+
+```{r}
+x <- seq(0, 6, 0.01)
+plot(x, df(x, 5, 20), type = "l", ylab = "f(x)", main = "F(5,20) pdf")
+plot(x, df(x, 10, 20), type = "l", ylab = "f(x)", main = "F(10,20) pdf")
+plot(x, df(x, 19, 20), type = "l", ylab = "f(x)", main = "F(19,20) pdf")
+
+plot(x, df(x, 19, 30), type = "l", ylab = "f(x)", main = "F(19,30) pdf")
+plot(x, df(x, 19, 40), type = "l", ylab = "f(x)", main = "F(19,40) pdf")
+plot(x, df(x, 19, 50), type = "l", ylab = "f(x)", main = "F(19,50) pdf")
+```
+We see that as we increase the numerator, the distribution becomes more concentrated around the peak (taller, thinner peak).  We see the same thing as we increase the denominator as well.
+
+### Document Information
+
+All of the statistical analyses in this document will be performed using `r R.version.string`.  R packages used will be maintained using the [packrat](http://rstudio.github.io/packrat/) dependency management system.  
+
+```{r session-info}
+sessionInfo()
+```

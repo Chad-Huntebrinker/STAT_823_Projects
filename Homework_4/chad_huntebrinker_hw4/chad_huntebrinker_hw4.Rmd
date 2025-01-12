@@ -1,0 +1,177 @@
+---
+title: "Chad Huntebrinker's Homework 4"
+author: "Chad Huntebrinker"
+date: "2024-09-22"
+output:
+  word_document: default
+  html_document: default
+---
+Question 1:
+
+Load the R built-in dataset "longley".
+
+Perform a summary analysis on the "GNP.deflator" and "Employed" variables in the "longley" dataset.
+
+Identify the correlation between "GNP.deflator" and "Employed" in the subset of records prior to 1950.
+
+Calculate a new variable "Product" by multiplying "GNP.deflator" and "Employed" for each record.
+
+Calculate the average value of the "Product" variable.
+
+Print only the records in the "longley" dataset prior to 1950, including the new "Product" variable.
+
+Use R "head()" function to print the first 7 rows of the "longley" dataset.
+
+Export the resulting subset of the "longley" dataset to a tab-delimited text file named "longley_subset.txt".
+```{r}
+#Question 1:
+
+#Load the R built-in dataset "longley".
+data("longley")
+
+#Perform a summary analysis on the "GNP.deflator" and "Employed" variables in the "longley" dataset.
+summary(longley$GNP.deflator)
+summary(longley$Employed)
+
+#Identify the correlation between "GNP.deflator" and "Employed" in the subset of records prior to 1950.
+data_prior_1950 <- subset(longley, longley$Year < 1950)
+correlation <- cor(data_prior_1950$GNP.deflator, data_prior_1950$Employed)
+print(correlation)
+
+#Calculate a new variable "Product" by multiplying "GNP.deflator" and "Employed" for each record.
+Product <- longley$GNP.deflator * longley$Employed
+
+#Calculate the average value of the "Product" variable.
+mean(Product)
+
+#Print only the records in the "longley" dataset prior to 1950, including the new "Product" variable.
+longley$Product <- Product
+product_prior_1950 <- subset(longley, longley$Year < 1950)
+print(product_prior_1950)
+
+#Use R "head()" function to print the first 7 rows of the "longley" dataset.
+head(longley, 7)
+
+#Export the resulting subset of the "longley" dataset to a tab-delimited text file named "longley_subset.txt".
+write.table(head(longley, 7), file = "longley_subset.txt")
+```
+
+Question 2:
+
+Load the R built-in dataset “airquality “
+
+Assign the rownames as AQrecord1, ACrecord2 and so on for all the rows of airquality
+
+What is the mean of "Ozone" and "Solar.R" columns?
+
+Check if NA values are existing. Use the complete.cases function to identify the NA values and separate the airquality into two different dataframes one with record containing NA values (airquality.NA) and the second without NA (airquality.WNA) values. How many records are in airquality.NA and without airquality.WNA?
+
+Export the airquality.WNA as a “airquality.WNA.csv” file.
+
+```{r}
+#Question 2:
+
+#Load the R built-in dataset “airquality “
+data("airquality")
+
+#Assign the rownames as AQrecord1, AQrecord2 and so on for all the rows of airquality
+rownames(airquality) <- paste("AQrecord", 1:nrow(airquality))
+
+#What is the mean of "Ozone" and "Solar.R" columns?
+mean(airquality$Ozone, na.rm = TRUE)
+mean(airquality$Solar.R, na.rm = TRUE)
+
+#Check if NA values are existing. Use the complete.cases function to identify the NA values and 
+#separate the airquality into two different dataframes one with 
+#record containing NA values (airquality.NA) and the second without NA (airquality.WNA) values. 
+#How many records are in airquality.NA and without airquality.WNA?
+sum(is.na(airquality))
+
+airquality.NA <- subset(airquality, complete.cases(airquality) == FALSE)
+airquality.WNA <- subset(airquality, complete.cases(airquality))
+
+dimension_of_na <- dim(airquality.NA)
+dimension_of_wna <- dim(airquality.WNA)
+
+print(dimension_of_na[1])
+print(dimension_of_wna[1])
+
+#Export the airquality.WNA as a “airquality.WNA.csv” file.
+write.csv(airquality.WNA, file = "airquality.WNA.csv")
+```
+
+Question 3:
+
+This question requires you to install and load “tidyverse” package before you start working.
+
+You are provided with exp_data.csv file that contains the data from an experiment.
+
+Read this data into a dataframe “exp.data” and then convert this into long format into “data_long” dataframe.
+
+Export the data_long as “exp_data_long.csv”
+
+Convert the long format back into wide format into a dataframe  “data_wide”
+
+```{r}
+#Question 3:
+
+#This question requires you to install and load “tidyverse” package before you start working.
+#You are provided with exp_data.csv file that contains the data from an experiment.
+#Read this data into a dataframe “exp.data” and then convert this into long format into “data_long” dataframe.
+#Export the data_long as “exp_data_long.csv”
+#Convert the long format back into wide format into a dataframe  “data_wide”
+library(conflicted)
+library("tidyverse")
+
+exp.data <- read.csv("exp_data.csv")
+
+# Convert to long format
+data_long <- exp.data %>%
+  pivot_longer(cols = !Sample_ID,
+               names_to = "OD",
+               values_to = "Data")
+print(data_long)
+
+write.csv(data_long, file = "exp_data_long.csv")
+data_wide <- data_long %>% 
+  pivot_wider(names_from = OD,
+              values_from = Data)
+```
+
+Question 4:
+
+Load the DNase dataset. Display the first few rows of the dataset
+
+Calculate the mean and standard deviation of the 'density' column.
+
+Create a new column 'conc_category' based on the 'conc' values (e.g., Low, Medium, High)
+
+Calculate the correlation between 'conc' and 'density'. Check the relation between concentration and density by generating a plot
+
+Calculate the percentage change in 'density' from the first row to the last row
+
+Export the modified dataframe as a table (e.g., CSV format)
+```{r}
+#Load the DNase dataset. Display the first few rows of the dataset
+data("DNase")
+head(DNase)
+
+#Calculate the mean and standard deviation of the 'density' column.
+mean(DNase$density)
+sd(DNase$density)
+
+#Create a new column 'conc_category' based on the 'conc' values (e.g., Low, Medium, High)
+DNase$conc_category <- ifelse(DNase$conc < 1, "Low",
+                              ifelse(DNase$conc <= 5, "Medium", "High"))
+
+#Calculate the correlation between 'conc' and 'density'. Check the relation between concentration and density by generating a plot
+cor(DNase$density, DNase$conc)
+plot(DNase$density, DNase$conc, pch = 16, xlab = "Density", ylab = "Concentration")
+
+#Calculate the percentage change in 'density' from the first row to the last row
+cat(((DNase$density[nrow(DNase)] - DNase$density[1]) / DNase$density[1]) * 100, "%", sep = "")
+
+#Export the modified dataframe as a table (e.g., CSV format)
+write.csv(DNase, file = "DNase_file.csv")
+```
+

@@ -1,0 +1,164 @@
+---
+title: "Visualize Data"
+output: word_document
+---
+
+## Your Turn 0
+
+Add a setup chunk that loads the tidyverse packages.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(conflicted)
+
+```
+
+
+
+```{r}
+mpg
+```
+
+
+## Your Turn 1
+
+Run the code on the slide to make a graph. Pay strict attention to spelling, capitalization, and parentheses!
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+## Your Turn 2
+
+Add `color`, `size`, `alpha`, and `shape` aesthetics to your graph. Experiment.  
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(displ, hwy, color = class, size = class, alpha = class, shape = class))
+```
+
+## Help Me
+
+What do `facet_grid()` and `facet_wrap()` do? 
+(run the code, interpret, convince your group)
+
+```{r}
+# Makes a plot that the commands below will modify
+q <- ggplot(mpg) + geom_point(aes(x = displ, y = hwy))
+
+q + facet_grid(. ~ cyl)
+q + facet_grid(drv ~ .)
+q + facet_grid(drv ~ cyl)
+q + facet_wrap(~ class)
+```
+It separates each type of car into a different scatter plot.
+## Your Turn 3
+
+Add the black code to your graph. What does it do?
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(displ, hwy, color = class)) +
+  labs(title = "Fuel Efficiency by Engine Size",
+       x = "Engine Size (displacement in liters)",
+       y = "Fuel Efficiency (MPG)",
+       color = "Class of \nAutomobile",
+       caption = "Data from the EPA")
+```
+Adds a title, subtitle, color title, x and y text, and a caption
+
+## Your Turn 4
+
+Replace this scatterplot with one that draws boxplots. Use the cheatsheet. Try your best guess.
+
+```{r}
+ggplot(mpg) + geom_boxplot(mapping = aes(x = class, y = hwy))
+```
+
+## Your Turn 5
+
+Make a histogram of the `hwy` variable from `mpg`. Hint: do not supply a y variable.
+
+```{r}
+ggplot(data = mpg) + geom_histogram(mapping = aes(x = hwy))
+```
+
+## Your Turn 6
+
+Use the help page for `geom_histogram` to make the bins 2 units wide.
+
+```{r}
+ggplot(data = mpg) + 
+  geom_histogram(mapping = aes(x = hwy), binwidth = 2)
+```
+
+## Your Turn 7
+
+Make a bar chart `class` colored by `class`. Use the help page for `geom_bar` to choose a "color" aesthetic for class.
+
+```{r}
+ggplot(data = mpg) +
+  geom_bar(mapping = aes(x = class, fill = class))
+```
+
+## Quiz
+
+What will this code do?
+
+```{r}
+ggplot(mpg) + 
+  geom_point(aes(displ, hwy)) +
+  geom_smooth(aes(displ, hwy))
+```
+This code will add a scatterplot to the graph and then a smoothing line.
+
+## Quiz
+
+What is different about this plot? Run the code!
+Note: had to comment out this code in order to knit it.
+
+```{r}
+#p <- ggplot(mpg) + 
+#  geom_point(aes(displ, hwy)) +
+#  geom_smooth(aes(displ, hwy))
+
+#library(plotly)
+#ggplotly(p)
+```
+This graph is interactive.  You are able to see what the x and y values are for the data points or a specific part of the smooth line.
+
+***
+
+# Take aways
+
+You can use this code template to make thousands of graphs with **ggplot2**.
+
+```{r eval = FALSE}
+ggplot(data = <DATA>) +
+  <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+```
+
+# Other Exercises
+
+1. What happens if you facet on a continuous variable?
+It'll create a new panel for each unique value for that variable.
+
+2. What are the advantages to using faceting instead of the color aesthetic? What are the disadvantages? How might the balance change if you had a larger dataset?
+Some of the advantages include each panel showing a distinct set of the data and easy comparison between all the facets.  Some of the disadvantages include a complexity in the vision when there are a large number of facets and not as much details in each one. One will need to consider whether it is better to use faceting (like trying to find a pattern between different variables) or color aesthetic (distinguishing between groups and how they perform compared to each other).
+
+3. What does the `se` argument to `geom_smooth()` do?
+It tells the argument whether or not to display the confidence interval.
+
+4. What is the default position adjustment for `geom_boxplot()`? Create a visualization from the `mpg` dataset that demonstrates different position adjustments.
+The default position adjustment for the function is dodge2.
+
+```{r}
+ggplot(data = mpg) +
+  geom_boxplot(aes(x = class, y = hwy, fill = class))
+
+#vs
+
+ggplot(data = mpg) +
+  geom_boxplot(aes(x = class, y = hwy, fill = factor(cyl)), position = "identity", alpha =0.5)
+```

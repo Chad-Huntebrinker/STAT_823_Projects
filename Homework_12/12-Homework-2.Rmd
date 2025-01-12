@@ -1,0 +1,205 @@
+---
+title: "Comparing Groups on Continuous Outcomes"
+output: word_document
+---
+
+```{r setup}
+library(tidyverse)
+library(emmeans)
+
+# Add the code to import hsb2 here
+
+
+### Backup Import
+hsb2 <- within(read.csv("https://stats.idre.ucla.edu/wp-content/uploads/2016/02/hsb2-2.csv"), {
+ race <- as.factor(race)
+ schtyp <- as.factor(schtyp)
+ prog <- as.factor(prog)
+})
+
+# These variables are categorical factors
+# This is an important step
+attach(hsb2)
+hsb2$race <- as.factor(race)
+hsb2$schtyp <- as.factor(schtyp)
+hsb2$prog <- as.factor(prog)
+
+```
+
+## Your Turn 1
+
+* Assume 22 degrees of freedom.
+* Use the `pt()` function to calculate the $p-$value for $t=-7.5$. What is your conclusion?
+* Use the `pt()` function to calculate the $p-$value for $t=0.5$. What is your conclusion?
+* Use the `qt()` function to determine the value of $t$ that corresponds to $p=\alpha=0.05$ and compare it to the values of $t$ produced by the data.
+
+```{r}
+pt(-7.5, 22)
+pt(0.5, 22)
+qt(0.975, df = 22)
+```
+
+## Your Turn 2
+
+* Uncomment the code below to generate a random sample of 50 observations and calculate their mean.
+* Complete the code to create a boxplot of the data using `ggplot()`.
+
+```{r}
+set.seed(1)
+Y <- rnorm(50, 10, 2)
+df <- data.frame(Y)
+
+df %>% 
+  summarise(mean=mean(Y))
+
+df %>% ggplot() +
+  geom_boxplot(aes(y=Y)) + 
+  labs(x="") +
+  scale_x_discrete(labels=c(""))
+```
+
+## Your Turn 3
+
+* Uncomment the code below to generate a random sample of 16 observations per group and calculate their means by group.
+* Complete the code to create a boxplot of the data using `ggplot()`.
+
+```{r}
+set.seed(1)
+X <- c(rep(0,25),rep(1,25))
+Y <- 2*X + rnorm(50, 10, 1)
+df <- data.frame(cbind(X,Y))
+
+df %>% 
+  group_by(X) %>% 
+  summarise(mean=mean(Y))
+
+df %>% ggplot() +
+  geom_boxplot(aes(x=factor(X),y=Y)) +
+  labs(x="Group")
+```
+
+## Your Turn 4
+
+* Set your seed to 1.
+* Generate 48 random numbers: 16 from $N(10,1^2)$, 16 from $N(11,1^2)$, and 16 from $N(12,1^2)$.
+* Calculate the group means using  `summarise()`.
+* Create boxplots of the data by group using `ggplot()`.
+
+```{r}
+set.seed(1)
+X <- c(rep(0,16),rep(1,16),rep(2,16))
+Y <- X + rnorm(48, 10, 1)
+df <- data.frame(cbind(X,Y))
+
+df %>% 
+  group_by(X) %>% 
+  summarise(mean=mean(Y))
+
+df %>% ggplot() +
+  geom_boxplot(aes(x=factor(X),y=Y)) +
+  labs(x="Group")
+```
+
+## Your Turn 5
+
+* Set your seed to 1.
+* Generate 50 random numbers from a uniform distribution with a minimum of 0 and a maximum of 10 and save it as `X`.
+* Generate 50 random numbers from a normal distribution with standard deviation 2 and a mean equal to $X_i$ and save it as `Y`.
+* Combine `X` and `Y` into a dataframe named `df`.
+* Create a scatterplot of the data using `ggplot()`.
+
+```{r}
+set.seed(1)
+X <- runif(50, 0, 10)
+Y <- 2*X + rnorm(50, 0, 2)
+
+df <- data.frame(cbind(X,Y))
+
+df %>% ggplot(aes(x=X, y=Y)) +
+  geom_point()
+```
+
+## Your Turn 6
+
+* Using `math`, test $H_0: \mu = 50$ versus $H_1: \mu = 50$.
+* Create the boxplot.
+* Calculate the 95% confidence interval for $\mu$.
+* What is your conclusion?
+
+```{r}
+hsb2 %>% ggplot(aes(y=math)) +
+  geom_boxplot()
+t <- t.test(math, mu = 50)$statistic
+t > qt (0.975, 199, lower.tail = TRUE)
+#Reject H0: mu = 50
+#Conclude H1: mu != 50
+```
+
+## Your Turn 7
+
+* Compare `math` across `schtyp` by testing $H_0: \mu_1 = \mu_2$ versus $H_1: \mu_1 \neq \mu_2$.
+* Create the boxplots.
+* Calculate the 95% confidence interval for $\mu_1-\mu_2$.
+* What is your conclusion?
+
+```{r}
+hsb2 %>% ggplot(aes(x=schtyp, y=math)) +
+  geom_boxplot() +
+  scale_x_discrete(labels=c("Public", "Private"))
+t <- t.test(math~schtyp)$statistic
+t < qt(0.025, 55, 0.5, lower.tail = TRUE)
+#Reject H0: mu1 = mu2
+#Conclude H1: mu1 != mu2
+```
+
+## Your Turn 8
+
+* Compare `math` across `prog` by testing $H_0: \mu_1 = \mu_2 = \mu_3$ versus $H_1: \mu_j \neq \mu_j^\prime$ for some $j\neq j^\prime$.
+* Create the boxplots.
+* Calculate the 95% confidence intervals for each $\mu_j$.
+* What is your conclusion?
+
+```{r}
+hsb2 %>% ggplot(aes(x=prog,y=math)) +
+  geom_boxplot() +
+  scale_x_discrete(labels=c("General", "Academic", "Vocational"))
+m <- lm(math ~ prog, data = hsb2)
+anova(m)
+anova(m)$"F value"[1] > qf(0.95,2,197)
+#Reject H0: mu1 = mu2 = m3
+#Conclude H1: at least one muj != muj'
+```
+
+## Your Turn 9
+
+* Test whether `math` is linearly related to `science` by testing $H_0: \beta_1 = 0$ versus $H_1: \beta_1 \neq 0$.
+* Create the scatterplot and overlay the fitted line.
+* Calculate the 95% confidence interval for $\beta_1$.
+* What is your conclusion?
+
+```{r}
+hsb2 %>% ggplot(aes(x=math,y=science)) +
+  geom_point() +
+  labs(x = "Math Score",
+       y = "Science Score")
+m <- lm(science~math, data = hsb2)
+summary(m)$coefficient[2,3] > qt(0.975, 198)
+#Reject H0: B1 = 0
+#Conclude H1: B1 != 0
+```
+
+# Take Aways
+
+* Boxplots are good for comparing a continuous measure between groups.
+
+* Scatterplots are good for investigating the association between two continuous measures.
+
+* Student's $t$ tests are appropriate for tests of a continuous measure in 1 or 2 groups.
+
+* ANOVA is appropriate for tests of a continuous measure in 2+ groups.
+
+* Simple linear regression is appropriate for testing whether two continuous measures are linearly associated.
+
+* Use `t.test()`, `lm()`, and `anova()` to compare group means across 2 or more levels of $X$.
+
+* All these methods have assumptions that must be verified. Otherwise, non-parametric methods should be substituted.

@@ -1,0 +1,242 @@
+---
+title: "Homework 6"
+author: "Chad Huntebrinker"
+date: "`r Sys.Date()`"
+output: word_document
+---
+# Question 1: 
+Debug the following function that calculates the factorial of a number. Identify and fix the issue causing the function to return incorrect results for negative input values.
+```{r}
+# Buggy Function
+get_factorial <- function(n) {
+    if (n == 0) {
+        return(1) # Clue: Buggy location, Control the statement here
+    } else {
+        return(n * factorial(n - 1))  
+    }
+}
+
+get_factorial(3) # works well
+get_factorial(-3) # throws error
+```
+
+## Answer for Question 1.
+```{r}
+get_factorial <- function(n) {
+    if (n <= 0) { #Changed this to <= instead of ==
+        return(1) 
+    } else {
+        return(n * factorial(n - 1))  
+    }
+}
+get_factorial(3) 
+get_factorial(-3)
+
+```
+
+
+
+# Question 2:
+You are given a function named calculate_area_circle intended to calculate the area of a circle. However, the function seems to have some errors. Your task is to debug the function step by step and make the necessary modifications to ensure it calculates the area correctly.
+Start by running the function calculate_area_circle with some sample inputs and observe the output. Identify any errors or unexpected behavior.
+Debug the code of the calculate_area_circle function line by line. Look for potential sources of error such as typos, incorrect variable names, or mathematical errors.
+After making modifications to the function, test it again with various input values to ensure that it produces the expected output for a range of scenarios.
+Add comments and documentation to the function code to explain its purpose, inputs, outputs, and any modifications made during debugging.
+```{r}
+# Buggy Function: calculate_area_circle
+
+calculate_area_circle <- function(radius) {
+    # Incorrect formula: area = pi * radius (missing exponent)
+    area <- pi * radius
+    # Missing return statement
+    print(area)  # Extra print statement
+}
+
+calculate_area_circle(6) # the output is is not valid
+# it should throw the following warning messages when the function is used with undesirable arguments. 
+calculate_area_circle(0) # Radius should be a non-zero numeric value.
+calculate_area_circle(-1) # Radius cannot be negative.
+# calculate_area_circle(3,4) # Radius should be a single value.
+# calculate_area_circle("three") # it should produce warning message: "Only numeric values are allowed"
+# the above two lines 66 and 67 should be kept in comments while knitting, or else it will throw error while knitting to word
+```
+
+##Answer to Question 2
+```{r}
+# Corrected Function: calculate_area_circle
+calculate_area_circle <- function(radius) {
+    #Added the following if statements for edge cases like if radius is a string, 0, a negative number, or has multiple values
+    if (length(radius) != 1) {
+      return("Radius should be a single value.")
+    }
+    else if(is.character(radius)){
+      return("Only numeric values are allowed")
+    }
+    else if(radius == 0) {
+      return("Radius should be a non-zero numeric value.")
+    }
+    else if(radius < 0) {
+      return("Radius cannot be negative.")
+    }
+    # Incorrect formula, was missing an exponent. Squared the radius
+    area <- pi * radius^2
+    # Added a return statement and removed the extra print statement
+    return(area)
+}
+
+calculate_area_circle(6) # the output is is not valid
+# it should throw the following warning messages when the function is used with undesirable arguments. 
+calculate_area_circle(0) # Radius should be a non-zero numeric value.
+calculate_area_circle(-1) # Radius cannot be negative.
+#Changed the following to a vector rather than two separate values.
+calculate_area_circle(c(3,4)) # Radius should be a single value.
+calculate_area_circle("three") # it should produce warning message: "Only numeric values are allowed"
+# the above two lines should be kept in comments while knitting, or else it will throw error while knitting to word
+```
+
+# Question 3
+the matrix expression_data contains expression values for five genes across five samples.
+Following to this there is a function to calculate the average expression level of a gene across multiple samples.
+There are some bugs in the function that causes it to return incorrect results. We can use the debug() function to set a debugging flag at the beginning of the function to help us identify the bug.
+```{r}
+# Create example gene expression data
+gene_names <- c("GeneA", "GeneB", "GeneC", "GeneD", "GeneE")
+sample_names <- c("Sample1", "Sample2", "Sample3", "Sample4", "Sample5")
+
+# Generate random expression values
+set.seed(123) # for reproducibility
+expression_data <- matrix(data = round(runif(length(gene_names) * length(sample_names), min = 0, max = 100), 2),
+                          nrow = length(gene_names),
+                          ncol = length(sample_names),
+                          dimnames = list(gene_names, sample_names))
+
+# Display the gene expression data
+expression_data
+
+# Buggy Function to 
+# Buggy Function
+calculate_gene_average <- function(expression_data, gene_name) {
+
+    gene_expression <- expression_data[gene_name, ]
+    
+    tot_expression <- sum(gene_expression) / 100 #Why is this line divided by 100
+    
+    average_expression <- mean(tot_expression) #Why do we need this line?
+
+    average_expression <- expression_data[gene_name + 1, ] #This line is causing the error
+    
+    return(average_expression)
+}
+
+#calculate_gene_average(expression_data, "GeneA") # this is generating error
+# the above line is an erroneous code of line. it will be executed and produce some out put when you run the code in the chunk. But when knitting it will halt  the knitting process. Commenting it solves the problem
+```
+
+
+
+## Answer to Question 3
+```{r}
+# Corrected Function
+# Create example gene expression data
+gene_names <- c("GeneA", "GeneB", "GeneC", "GeneD", "GeneE")
+sample_names <- c("Sample1", "Sample2", "Sample3", "Sample4", "Sample5")
+
+# Generate random expression values
+set.seed(123) # for reproducibility
+expression_data <- matrix(data = round(runif(length(gene_names) * length(sample_names), min = 0, max = 100), 2),
+                          nrow = length(gene_names),
+                          ncol = length(sample_names),
+                          dimnames = list(gene_names, sample_names))
+
+# Display the gene expression data
+expression_data
+
+# Buggy Function.  Since we're calculating the mean of a expression for a specific gene through 5 different samples, all we need to do is alter the function a bit.
+calculate_gene_average <- function(expression_data, gene_name) {
+    gene_expression <- expression_data[gene_name, ]
+    
+    #Changed the sum to be divided by 100 to 5 (since we're getting the average)
+    average_expression <- sum(gene_expression) / 5
+    
+    #We can remove the other two lines as they weren't doing anything for us
+    
+    return(average_expression)
+}
+
+calculate_gene_average(expression_data, "GeneA") # this is generating error
+# the above line is an erroneous code of line. it will be executed and produce some out put when you run the code in the chunk. But when knitting it will halt  the knitting process. Commenting it solves the problem
+
+```
+
+
+# Question 4
+Here we are creating a simple clinical data management example with a dataframe containing information about patients.
+we have created a function that calculates the average age of patients with a given diagnosis,but with some bugs.
+debug the function and correct it.
+```{r}
+# Generate patient data
+patient_data <- data.frame(
+  Patient_id = c(1, 2, 3, 4, 5),
+  Age = c(25, 30, 45, 60, 35),
+  Gender = c("Male", "Female", "Male", "Female", "Male"),
+  Diagnosis = c("Hypertension", "Diabetes", "Hypertension", "Asthma", "Diabetes"),
+  Treatment = c("Medication", "Insulin", "Medication", "Inhaler", "Insulin")
+)
+
+# Display the patient data
+patient_data
+
+# Buggy Function
+calculate_avg_age <- function(data, diagnosis) {
+
+  patients <- data[Diagnosis == diagnosis, ] 
+  
+  avg_age <- sum(patients$Age) / length(patients$Age)
+  
+  retunr(avg_age)
+ 
+  patients <- data[Diagnos == diagnosis, ] 
+  
+  avg_age <- sum(patients$Age)
+  
+  return(avg_age)
+}
+
+# Test the buggy function
+#calculate_avg_age(patient_data, "Diabetes")
+# the above line is an erroneous code of line. it will be executed and produce some out put when you run the code in the chunk. But when knitting it will halt  the knitting process. Commenting it solves the problem
+
+```
+
+
+## Answer to Question 4
+```{r}
+# Corrected Function
+
+# Generate patient data
+patient_data <- data.frame(
+  Patient_id = c(1, 2, 3, 4, 5),
+  Age = c(25, 30, 45, 60, 35),
+  Gender = c("Male", "Female", "Male", "Female", "Male"),
+  Diagnosis = c("Hypertension", "Diabetes", "Hypertension", "Asthma", "Diabetes"),
+  Treatment = c("Medication", "Insulin", "Medication", "Inhaler", "Insulin")
+)
+
+# Display the patient data
+patient_data
+
+# Buggy Function.  Removed redundant lines and added data$ to line 230
+calculate_avg_age <- function(data, diagnosis) {
+  patients <- data[data$Diagnosis == diagnosis, ] 
+  
+  avg_age <- sum(patients$Age) / length(patients$Age)
+  
+  return(avg_age)
+}
+
+# Test the buggy function
+calculate_avg_age(patient_data, "Diabetes")
+# the above line is an erroneous code of line. it will be executed and produce some out put when you run the code in the chunk. But when knitting it will halt  the knitting process. Commenting it solves the problem
+
+```
+
