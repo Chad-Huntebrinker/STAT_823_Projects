@@ -1,0 +1,111 @@
+---
+title: "Linear Regression"
+output: word_document
+---
+
+```{r setup}
+library(tidyverse)
+library(modelr)
+library(broom)
+library(readxl)
+
+# Import wages here
+wages <- read_excel("wages-1.xlsx", na = "NA")
+
+# Fall back in case you cannot load wages
+# wages <- heights %>%
+#   filter(income > 0) %>%
+#   mutate(marital = as.character(marital),
+#          sex = as.character(sex))
+```
+
+## Your Turn 1
+
+* Save the `wages.xlsx` dataset to your computer.  
+* Change the working directory to the same location.
+* Import `wages.xlsx` as wages and *copy the code to your setup chunk*.
+* Be sure to set NA: to NA.
+
+## Your Turn 2
+
+Fit the model on the slide and then examine the output. What does it look like?
+
+```{r}
+mod_e <- lm(log(income)~ education, data = wages)
+mod_e
+class(mod_e)
+```
+
+## Your Turn 3
+
+Use a pipe to model `log(income)` against `height`. Then use broom and dplyr functions to extract:
+
+1. The **coefficient estimates** and their related statistics 
+2. The **adj.r.squared** and **p.value** for the overall model
+
+```{r}
+mod_h <- wages %>% 
+  lm(log(income)~height, data =.)
+
+mod_h %>% tidy()
+
+mod_h %>% 
+  glance() %>% 
+  select(adj.r.squared, p.value)
+```
+
+
+## Your Turn 4
+
+Model `log(income)` against `education` and `height` and `sex`. Interpret the coefficients in narrative here.
+
+```{r}
+mod_ehs <- wages %>% 
+  lm(log(income)~education + height + sex, data = .)
+
+mod_ehs %>% tidy()
+#The sexmale term is an indicator variable (0,1).  As a result, if the person is a male they get 0.46 but
+#if they are a female, they get 0.  We also see that taller people are expected to get paid 
+#slightly more than shorter ones.
+
+```
+
+## Your Turn 5
+
+Add `+ geom_smooth(method = lm)` to the code below. What happens?
+
+```{r}
+wages %>%
+     ggplot(aes(x = height, y = log(income))) +
+     geom_point(alpha = 0.1) + 
+     geom_smooth(method=lm)
+#geom_smooth adds a line for predicting how height impacts income.
+```
+
+
+## Your Turn 6
+
+Use `add_predictions` to make the plot below.
+
+```{r warning = FALSE, message = FALSE}
+
+# In case you haven't made the ehs model
+mod_ehs <- wages %>% lm(log(income) ~ education + height + sex, data = .)
+
+# Make plot here
+wages %>% 
+  add_predictions(mod_ehs) %>% 
+  ggplot(mapping = aes(x = height, y = pred, color = sex)) +
+  geom_line() + 
+  facet_wrap(~ education)
+```
+
+***
+
+# Take Aways
+
+* Use `glance()`, `tidy()`, and `augment()` from the **broom** package to return model values in a data frame.
+
+* Use `add_predictions()` or `gather_predictions()` or `spread_predictions()` from the **modelr** package to visualize predictions.
+
+* Use `add_residuals()` or `gather_residuals()` or `spread_residuals()` from the **modelr** package to visualize residuals.

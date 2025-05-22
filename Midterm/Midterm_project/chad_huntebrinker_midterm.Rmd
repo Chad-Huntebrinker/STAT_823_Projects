@@ -1,0 +1,204 @@
+---
+title: "Chad Huntebrinker's Midterm"
+author: "Chad Huntebrinker"
+date: "2024-10-19"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+#Chad Huntebrinker
+library(dplyr)
+
+#Read Data
+cell.data <- read.csv("cell_clinical_data.csv")
+
+#Part 1: Clean the data
+#Problem 1
+colnames(cell.data)
+
+#Problem 2
+Patient.ID_duplicates <-  cell.data[duplicated(cell.data$Patient.ID), ]
+Sample.ID_duplicates <- cell.data[duplicated(cell.data$Sample.ID), ]
+
+#Problem 3
+cell.data$Pt.id <- paste0("Pt_", seq(1, nrow(cell.data)))
+
+#Problem 4
+cell.data$Pt.id <- paste0(cell.data$Pt.id, "_", sub("_.*", "", cell.data$Sample.ID))
+
+#Problem 5
+cell.data <- cell.data %>%
+  relocate(Pt.id, .before = Study.ID)
+
+#Problem 6
+#Change all the unwanted columns to NULL to remove them
+cell.data$Patient.ID <- NULL
+cell.data$Sample.ID <- NULL
+cell.data$Annotation.Source <- NULL
+cell.data$Cell.Line.Source <- NULL
+cell.data$Cancer.Type.Detailed <- NULL
+cell.data$DepMap.ID <- NULL
+cell.data$Race.Category <- NULL
+cell.data$Sample.Type <- NULL
+cell.data$TMB..nonsynonymous. <- NULL
+cell.data$Tumor.Type <- NULL
+
+#Problem 7
+cell.data$Age[is.na(cell.data$Age)] <- sample(1:100, sum(is.na(cell.data$Age)), replace = TRUE)
+
+#Problem 8
+cell.data <- cell.data %>%
+  rename(Ethnicity = Ethnicity.Category)
+
+#Problem 9
+ethnicities <- c("White", "Hispanic", "Black")
+cell.data$Ethnicity[is.na(cell.data$Ethnicity)] <- sample(ethnicities, sum(is.na(cell.data$Ethnicity)), replace = TRUE)
+
+#Problem 10
+min_value <- min(cell.data$Fraction.Genome.Altered, na.rm = TRUE)
+max_value <- max(cell.data$Fraction.Genome.Altered, na.rm = TRUE)
+
+cell.data$Fraction.Genome.Altered[is.na(cell.data$Fraction.Genome.Altered)] <- 
+  runif(sum(is.na(cell.data$Fraction.Genome.Altered)), min = min_value, max = max_value)
+
+#Problem 11
+media_types <- c("DMEM", "RPMI-1640", "MEM", "EMEM", "FBS")
+
+cell.data$Growth.Medium[is.na(cell.data$Growth.Medium)] <- 
+  sample(media_types, sum(is.na(cell.data$Growth.Medium)), replace = TRUE)
+
+#Problem 12
+cell.data$Mutation.Count[is.na(cell.data$Mutation.Count)] <- 
+  sample(1:20000, sum(is.na(cell.data$Mutation.Count)), replace = TRUE)
+
+#Problem 13
+cell.data$Mutation.Rate[is.na(cell.data$Mutation.Rate)] <- 
+  with(cell.data, Mutation.Count[is.na(Mutation.Rate)] / (Fraction.Genome.Altered[is.na(Mutation.Rate)] * 3000000))
+
+#Problem 14
+cell.data$Ploidy[nchar(cell.data$Ploidy) > 4] <- NA
+
+#Problem 15
+min_value <- as.numeric(min(cell.data$Ploidy, na.rm = TRUE))
+max_value <- as.numeric(max(cell.data$Ploidy, na.rm = TRUE))
+
+cell.data$Ploidy[is.na(cell.data$Ploidy)] <- round(runif(sum(is.na(cell.data$Ploidy)), min = min_value, max = max_value), 2)
+
+#Problem 16
+cell.data$Primary.Tumor.Site <- sub("_.*", "", cell.data$Primary.Tumor.Site)
+
+#Problem 17
+#Rename all the values using ifelse statements
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Large", "Large Intestine", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Biliary", "Biliary Tract", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Central", "Central Nervous System", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Haematopoietic And Lymphoid Tissue", "Haematopoietic", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Salivary", "Salivary Gland", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Small", "Small Intestine", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Soft", "Soft Tissue", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Upper", "Upper Aerodigestive Tract", 
+                                       cell.data$Primary.Tumor.Site)
+cell.data$Primary.Tumor.Site <- ifelse(cell.data$Primary.Tumor.Site == "Urinary", "Urinary Tract", 
+                                       cell.data$Primary.Tumor.Site)
+
+#Problem 18
+cell.data$Primary.Tumor.Site[is.na(cell.data$Primary.Tumor.Site)] <- 
+  sub(" .*", "", cell.data$Cancer.Type[is.na(cell.data$Primary.Tumor.Site)])
+
+#Problem 19
+sex_type <- c("Male", "Female")
+
+cell.data$Sex[is.na(cell.data$Sex)] <- sample(sex_type, sum(is.na(cell.data$Sex)), replace = TRUE)
+
+cell.data$Sex[cell.data$Cancer.Type == "Breast Cancer"] <- "Female"
+cell.data$Sex[cell.data$Cancer.Type == "Prostate Cancer"] <- "Male"
+
+#Problem 20
+anyNA(cell.data)
+
+
+#Part 2: Analysis and interpretation
+#Problem 1
+summary(cell.data)
+str(cell.data)
+dim(cell.data)
+names(cell.data)
+
+#Problem 2
+table(cell.data$Study.ID)
+
+#Problem 3
+#I prefer to use a histogram because it shows all the ages and the number of times they are used
+hist(cell.data$Age, main = "Histogram of Ages", xlab = "Age")
+
+#Problem 4
+cancer_table <- table(cell.data$Cancer.Type)
+names(which.max(table(cell.data$Cancer.Type)))
+
+barplot_cancer <- barplot(cancer_table, main = "Barplot of Cancer Types",)
+text(barplot_cancer, cancer_table, labels = cancer_table, cex = 0.6, pos = 3)
+
+#Problem 5
+table(cell.data$Growth.Medium[cell.data$Cancer.Type == "Bladder Cancer"])
+
+#Problem 6
+temp.cell.data <- cell.data[cell.data$Mutation.Rate > 1, ]
+plot(Mutation.Count~Mutation.Rate, data = temp.cell.data)
+
+#Problem 7
+par(mfrow = c(1, 2))
+
+temp.cell.data <- cell.data[cell.data$Sex == "Male", ]
+hist(as.numeric(temp.cell.data$Ploidy), main = "Male Ploidy Distribution",
+     xlab = "Ploidy Amount")
+
+temp.cell.data <- cell.data[cell.data$Sex == "Female", ]
+hist(as.numeric(temp.cell.data$Ploidy), main = "Female Ploidy Distribution",
+     xlab = "Ploidy Amount")
+
+#Problem 8
+cell.data.obj <- list(
+ c(cell.data$Cancer.Type),
+ c(cell.data$Growth.Medium),
+ c(cell.data$Primary.Tumor.Site),
+ c(cell.data$Oncotree.Code)
+)
+
+#Problem 9
+# Initialize a new column for age group
+cell.data$Age.Group <- NA
+
+# Categorize ages using a for loop
+for (i in 1:nrow(cell.data)) {
+  if (cell.data$Age[i] <= 20) {
+    cell.data$Age.Group[i] <- "Child"
+  }
+  else if (cell.data$Age[i] <= 60) {
+    cell.data$Age.Group[i] <- "Adult"
+  }
+  else {
+    cell.data$Age.Group[i] <- "Senior"
+  }
+}
+mean(cell.data$Mutation.Count[cell.data$Age.Group == "Child"])
+mean(cell.data$Mutation.Count[cell.data$Age.Group == "Adult"])
+mean(cell.data$Mutation.Count[cell.data$Age.Group == "Senior"])
+
+con_table <- table(cell.data$Study.ID, cell.data$Ethnicity)
+par(mfrow = c(1, 1))
+#con_table <- as.data.frame(con_table)
+barplot(con_table, col = c("Red", "Blue", "Black"), main = "Distribution of Ethnicity")
+legend("topleft", legend = c("Red = ccle_broad_2019", "Blue = cellline_ccle_broad", "Black = cellline_nci60"),
+       title = "Legend", cex = 0.7)
+
+```
+

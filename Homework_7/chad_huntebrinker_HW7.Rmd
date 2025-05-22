@@ -1,0 +1,96 @@
+---
+title: "Homework 7"
+author: "Chad Huntebrinker"
+date: "2024-10-10"
+output: word_document
+---
+Question 1
+A function is defined in the following chunk to calculate the square of each element using a for loop. Convert this function into a vectorized function
+```{r}
+# Define a function to calculate the square of each element using a for loop
+square_with_loop <- function(x) {
+  result <- numeric(length(x))  # Initialize an empty numeric vector to store results
+  for (i in seq_along(x)) {
+    result[i] <- x[i]^2  # Calculate square of each element and store in result vector
+  }
+  return(result)
+}
+
+# Test the function
+numbers <- c(1, 2, 3, 4, 5)
+print(square_with_loop(numbers))
+
+```
+
+Answer to Question 1
+```{r}
+square_with_loop <- function(x) {
+  return(x^2)
+}
+
+# Test the function
+numbers <- c(1, 2, 3, 4, 5)
+print(square_with_loop(numbers))
+
+```
+
+Question 2
+A function is defined in the following chunk  to calculate the cumulative sum of elements in a given numeric vector using a for loop.Convert this function into a vectorized function
+```{r}
+# Define function to calculate cumulative sum using a for loop
+cumulative_sum_for_loop <- function(x) {
+  result <- numeric(length(x))  # Initialize a numeric vector to store cumulative sum
+  sum_so_far <- 0  # Initialize variable to keep track of sum so far
+  for (i in seq_along(x)) {
+    sum_so_far <- sum_so_far + x[i]  # Update sum so far
+    result[i] <- sum_so_far  # Store cumulative sum in result vector
+  }
+  return(result)
+}
+
+# Test the function
+numbers <- c(1, 2, 3, 4, 5)
+print(cumulative_sum_for_loop(numbers))
+
+```
+
+Answer to Question 2
+```{r}
+# Define function to calculate cumulative sum using a for loop
+cumulative_sum_for_loop <- function(x) {
+  return(sum(x))
+}
+
+# Test the function
+numbers <- c(1, 2, 3, 4, 5)
+print(cumulative_sum_for_loop(numbers))
+
+```
+
+Question 3
+Perform k-means clustering on the Iris dataset both serially and in parallel. Perform clustering on the first four columns of the Iris dataset, excluding the species (5th) column.
+report the computation times
+```{r}
+library(datasets)
+library(parallel)
+data(iris)
+fx <- function(nstart){
+  # Perform k-means clustering on a data matrix Boston.
+  return(kmeans(iris_data, centers = 4, nstart = nstart))
+}
+#Get the first four columns
+iris_data <- data.frame(iris$Sepal.Length, iris$Sepal.Width, iris$Petal.Length, iris$Petal.Width)
+starts <- rep(100, 400)
+
+#Complete serieally
+system.time(results <- lapply(starts, fx))
+
+#Complete parallel
+numCores <- detectCores()
+cl <- makeCluster(8)
+clusterExport(cl=cl, c('iris_data'))
+results <- parLapply(cl,starts, fx)
+system.time(results <- parLapply(cl,starts, fx))
+stopCluster(cl)
+
+```
